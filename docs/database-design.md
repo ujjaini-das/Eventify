@@ -46,8 +46,10 @@ Fields:
 - qrCode
 - status
 - createdAt
+- updatedAt
 
 
+## 5. model
 User ------ creates ------> Event
  |                           |
  |                           |
