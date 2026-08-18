@@ -27,7 +27,7 @@ const getEvents = async (req, res) => {
 const createEvent = async (req, res) => {
     try{
         const{ title, description, date, time, venue, category, capacity, banner } = req.body;
-        const event = await Event.create({ title, description, date, time, venue, category, capacity, banner });
+        const event = await Event.create({ title, description, date, time, venue, category, capacity, banner, organiser: req.user.userId });
         res.status(201).json(event);
     }
     catch (error){
@@ -79,14 +79,7 @@ const updateEvent = async (req, res) => {
         if (capacity !== undefined) updates.capacity = capacity;
         if (banner !== undefined) updates.banner = banner;
 
-        const event = await Event.findByIdAndUpdate(
-            id,
-            updates,
-            {
-                new: true, //we get the updated event back.
-                runValidators: true //Apply our schema validation during the update too.
-            }
-        );
+        const event = await Event.findById(id);
 
         if (!event) {
             return res.status(404).json({
@@ -94,7 +87,22 @@ const updateEvent = async (req, res) => {
             });
         }
 
-        res.json(event);
+        if (event.organiser.toString() !== req.user.userId) {
+            return res.status(403).json({
+                message: "You are not allowed to modify this event"
+            });
+        }
+
+        const updatedEvent = await Event.findByIdAndUpdate(
+            id,
+            updates,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        res.json(updatedEvent);
 
 
     }catch (error) {
@@ -118,15 +126,27 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
     try {
         const id = req.params.id;
-        const event = await Event.findByIdAndDelete(id);
+
+        const event = await Event.findById(id);
+
         if (!event) {
             return res.status(404).json({
                 message: "Event not found"
             });
         }
+
+        if (event.organiser.toString() !== req.user.userId) {
+            return res.status(403).json({
+                message: "You are not allowed to delete this event"
+            });
+        }
+
+        await Event.findByIdAndDelete(id);
+
         res.json({
             message: "Event deleted successfully"
         });
+
 
     } catch (error) {
 

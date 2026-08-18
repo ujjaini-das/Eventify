@@ -45,10 +45,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    Organiser: {
+    organiser: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        // required: true
+        required: true
     }
 }, {
     timestamps: true
