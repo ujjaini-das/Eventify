@@ -10,10 +10,10 @@ router.get("/profile", protect, (req, res) => {
     });
 });
 
-const { registerUser, loginUser } = require("../controllers/auth.controller");
+const { registerUser, loginUser, getMe } = require("../controllers/auth.controller");
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-
+router.get("/me", protect, getMe);
 
 
 module.exports = router;

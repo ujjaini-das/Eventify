@@ -95,7 +95,35 @@ const loginUser = async (req, res) => {
     });
 };
 
+const getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        res.json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profileImage: user.profileImage
+        });
+
+    } catch (error) {
+        console.error("GET ME ERROR:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch user"
+        });
+    }
+};
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    getMe
 };

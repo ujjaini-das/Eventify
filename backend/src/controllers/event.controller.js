@@ -87,7 +87,7 @@ const updateEvent = async (req, res) => {
             });
         }
 
-        if (event.organiser.toString() !== req.user.userId) {
+        if (event.organiser.toString() !== req.user.userId && req.user.role !== "admin") {
             return res.status(403).json({
                 message: "You are not allowed to modify this event"
             });
@@ -135,7 +135,7 @@ const deleteEvent = async (req, res) => {
             });
         }
 
-        if (event.organiser.toString() !== req.user.userId) {
+        if (event.organiser.toString() !== req.user.userId && req.user.role !== "admin") {
             return res.status(403).json({
                 message: "You are not allowed to delete this event"
             });
