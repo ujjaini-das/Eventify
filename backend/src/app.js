@@ -8,4 +8,7 @@ app.use("/api/events", eventRoutes);
 const authRoutes = require("./routes/auth.routes");
 app.use("/api/auth", authRoutes);
 
+const registrationRoutes = require("./routes/registration.routes");
+app.use("/api/registrations", registrationRoutes);
+
 module.exports = app;
