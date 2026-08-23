@@ -1,9 +1,26 @@
 const Event = require("../models/event.model");
+const Registration = require("../models/registration.model");
+const mongoose = require("mongoose");
 
 const getEvents = async (req, res) => {
     try{
-        const { category, search } = req.query;
+        const { category, search, page=1, limit=10 } = req.query;
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        if (
+            !Number.isInteger(pageNumber) ||
+            !Number.isInteger(limitNumber) ||
+            pageNumber < 1 ||
+            limitNumber < 1 ||
+            limitNumber > 100
+        ) {
+            return res.status(400).json({
+                message: "Page and limit must be valid positive integers. Limit cannot exceed 100"
+            });
+        }
         const filter = {};
+        const skip = (pageNumber - 1) * limitNumber;
         if (category){
             filter.category = category;
         }
@@ -14,8 +31,33 @@ const getEvents = async (req, res) => {
             };
         }
 
-        const events = await Event.find(filter);
-        res.json(events);
+        const totalEvents = await Event.countDocuments(filter);
+        const totalPages = Math.ceil(totalEvents / limitNumber);
+        if (pageNumber > totalPages && totalEvents > 0) {
+            return res.status(404).json({
+                message: "Page not found"
+            });
+        }
+        const events = await Event.find(filter).skip(skip).limit(limitNumber);
+        const eventsWithRegistrationCount = await Promise.all(
+            events.map(async (event) => {
+                const registrationCount = await Registration.countDocuments({
+                    event: event._id
+                });
+                const remainingSeats = event.capacity - registrationCount;
+                return{ ...event.toObject(), registrationCount, remainingSeats};
+            })
+        );
+
+        res.json({
+            events: eventsWithRegistrationCount,
+            pagination: {
+                totalEvents,
+                totalPages,
+                currentPage: pageNumber,
+                limit: limitNumber
+            }
+        });
     }
     catch (error) {
         res.status(500).json({
@@ -31,7 +73,14 @@ const createEvent = async (req, res) => {
         res.status(201).json(event);
     }
     catch (error){
-        console.error("Cretated Event Error: ", error);
+         if (error.name === "ValidationError") {
+            return res.status(400).json({
+                message: error.message
+            });
+        }
+
+        console.error("CREATE EVENT ERROR:", error);
+
         res.status(500).json({
             message: "Failed to create event"
         });
@@ -41,6 +90,11 @@ const createEvent = async (req, res) => {
 const getEventById = async (req, res) => {
     try{
         const id = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid event ID"
+            });
+        }
         const event = await Event.findById(id);
         if(!event){
             return res.status(404).json({
@@ -66,6 +120,11 @@ const getEventById = async (req, res) => {
 const updateEvent = async (req, res) => {
     try{
         const id = req.params.id;
+                if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid event ID"
+            });
+        }
         const { title, description, date, time, venue, category, capacity, banner } = req.body;
 
         const updates = {};
@@ -93,6 +152,18 @@ const updateEvent = async (req, res) => {
             });
         }
 
+        if (capacity !== undefined) {
+            const registrationCount = await Registration.countDocuments({
+                event: id
+            });
+
+            if (capacity < registrationCount) {
+                return res.status(400).json({
+                    message: "Capacity cannot be less than the current number of registrations"
+                });
+            }
+        }
+
         const updatedEvent = await Event.findByIdAndUpdate(
             id,
             updates,
@@ -106,11 +177,7 @@ const updateEvent = async (req, res) => {
 
 
     }catch (error) {
-        if (error.name === "CastError") {
-            return res.status(400).json({
-                message: "Invalid event ID"
-            });
-        }
+        
         if (error.name === "ValidationError") {
             return res.status(400).json({
                 message: error.message
@@ -126,7 +193,11 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
     try {
         const id = req.params.id;
-
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid event ID"
+            });
+        }
         const event = await Event.findById(id);
 
         if (!event) {
@@ -141,6 +212,10 @@ const deleteEvent = async (req, res) => {
             });
         }
 
+        await Registration.deleteMany({
+            event: id
+        });
+
         await Event.findByIdAndDelete(id);
 
         res.json({
@@ -149,12 +224,6 @@ const deleteEvent = async (req, res) => {
 
 
     } catch (error) {
-
-        if (error.name === "CastError") {
-            return res.status(400).json({
-                message: "Invalid event ID"
-            });
-        }
         console.error("DELETE EVENT ERROR:", error);
         res.status(500).json({
             message: "Failed to delete event"

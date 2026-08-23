@@ -3,16 +3,26 @@ const eventSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 3,
+        maxlength: 100
     },
     description: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 10,
+        maxlength: 2000
     },
     date: {
         type: Date,
-        required: true
+        required: true,
+        validate: {
+            validator: function(value) {
+                return value > newDate();
+            },
+            message: "Event date must be in the future"
+        }
     },
     time: {
         type: String,
@@ -21,7 +31,9 @@ const eventSchema = new mongoose.Schema({
     venue: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 2,
+        maxlength: 200
     },
     category: {
         type: String,
@@ -39,7 +51,8 @@ const eventSchema = new mongoose.Schema({
     capacity: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
+        max: 100000
     },
     banner: {
         type: String,
