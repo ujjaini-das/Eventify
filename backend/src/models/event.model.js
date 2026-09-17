@@ -19,7 +19,7 @@ const eventSchema = new mongoose.Schema({
         required: true,
         validate: {
             validator: function(value) {
-                return value > newDate();
+                return value > new Date();
             },
             message: "Event date must be in the future"
         }
@@ -48,11 +48,20 @@ const eventSchema = new mongoose.Schema({
             "Other"
         ]
     },
+    customCategory: {
+        type: String,
+        trim: true
+    },
     capacity: {
         type: Number,
         required: true,
         min: 1,
         max: 100000
+    },
+    registeredCount: {
+        type: Number,
+        default: 0,
+        min: 0
     },
     banner: {
         type: String,

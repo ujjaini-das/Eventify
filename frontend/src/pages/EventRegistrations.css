@@ -1,0 +1,242 @@
+.registrations-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 70px 40px;
+}
+
+/* Header */
+
+.registrations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    margin-bottom: 45px;
+}
+
+.registrations-header h1 {
+    margin: 8px 0 12px;
+    font-size: 52px;
+    font-weight: 600;
+    letter-spacing: -2px;
+    color: var(--text-primary);
+}
+
+.registrations-header p:not(.section-label) {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.section-label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--primary);
+}
+
+/* Back button */
+
+.back-dashboard-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.back-dashboard-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Summary */
+
+.registrations-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 26px;
+    margin-bottom: 25px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.registrations-summary strong {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.registrations-summary span {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Registration list */
+
+.registrations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.registration-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 24px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.registration-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+/* Avatar */
+
+.attendee-avatar {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Attendee information */
+
+.attendee-info {
+    flex: 1;
+}
+
+.attendee-info h2 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.attendee-info p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Role */
+
+.registration-role {
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: var(--background);
+    border: 1px solid var(--border);
+
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+/* Empty / loading / error */
+
+.registrations-empty {
+    padding: 70px 30px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+}
+
+.registrations-empty h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+.registrations-empty p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.registration-state {
+    max-width: 700px;
+    margin: 120px auto;
+    padding: 40px;
+    text-align: center;
+}
+
+.registration-state h2 {
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.registration-state p {
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .registrations-page {
+        padding: 45px 20px;
+    }
+
+    .registrations-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .registrations-header h1 {
+        font-size: 40px;
+        letter-spacing: -1px;
+    }
+
+    .registration-card {
+        padding: 17px;
+    }
+
+    .registration-role {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .registrations-header h1 {
+        font-size: 34px;
+    }
+
+    .registrations-summary {
+        padding: 18px 20px;
+    }
+
+    .attendee-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+
+    .attendee-info h2 {
+        font-size: 15px;
+    }
+
+    .attendee-info p {
+        font-size: 13px;
+        word-break: break-word;
+    }
+}

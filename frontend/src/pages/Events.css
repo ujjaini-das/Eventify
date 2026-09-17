@@ -1,0 +1,240 @@
+.events-page {
+    min-height: 100vh;
+    padding: 110px 7% 90px;
+}
+
+.events-header {
+    max-width: 760px;
+    margin-bottom: 60px;
+}
+
+.events-eyebrow {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.events-header h1 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(48px, 6vw, 76px);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    max-width: 700px;
+}
+
+.events-header h1 span {
+    color: var(--primary);
+    font-style: italic;
+}
+
+.events-header > p:last-child {
+    max-width: 620px;
+    margin-top: 25px;
+
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+@media (max-width: 1000px) {
+    .events-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 650px) {
+    .events-page {
+        padding: 90px 5% 60px;
+    }
+
+    .events-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .events-header {
+        margin-bottom: 40px;
+    }
+}
+
+/* Search & Filters */
+
+.events-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 42px;
+    margin-bottom: 48px;
+}
+
+.events-search {
+    display: flex;
+    flex: 1;
+    max-width: 620px;
+}
+
+.events-search input {
+    flex: 1;
+    height: 52px;
+    padding: 0 18px;
+    border: 1px solid #d8d5d0;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    background: #ffffff;
+    color: #1d1d1f;
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+}
+
+.events-search input:focus {
+    border-color: #6c4cff;
+}
+
+.events-search button {
+    height: 52px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    background: #1d1d1f;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.events-search button:hover {
+    background: #6c4cff;
+}
+
+.events-controls select {
+    height: 52px;
+    min-width: 190px;
+    padding: 0 16px;
+    border: 1px solid #d8d5d0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1d1d1f;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+}
+
+.events-controls select:focus {
+    border-color: #6c4cff;
+}
+
+
+/* Loading / Empty State */
+
+.events-state {
+    padding: 70px 20px;
+    text-align: center;
+}
+
+.events-state h2 {
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.events-state p {
+    color: #77736f;
+}
+
+
+/* Pagination */
+
+.events-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-top: 56px;
+    padding-bottom: 60px;
+}
+
+.events-pagination button {
+    padding: 11px 18px;
+    border: 1px solid #d8d5d0;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #1d1d1f;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.events-pagination button:hover:not(:disabled) {
+    border-color: #6c4cff;
+    color: #6c4cff;
+}
+
+.events-pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.events-pagination span {
+    color: #77736f;
+    font-size: 14px;
+}
+
+.events-search button[type="button"] {
+    margin-left: 8px;
+    border: 1px solid #d8d5d0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #77736f;
+}
+
+.events-search button[type="button"]:hover {
+    background: #f5f3f0;
+    color: #1d1d1f;
+    border-color: #b8b3ad;
+}
+
+.events-loader {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 18px;
+    border: 3px solid #e5e1dc;
+    border-top-color: #6c4cff;
+    border-radius: 50%;
+    animation: events-spin 0.8s linear infinite;
+}
+
+@keyframes events-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.events-reset-button {
+    margin-top: 22px;
+    padding: 11px 20px;
+    border: 1px solid #d8d5d0;
+    border-radius: 8px;
+    background: #1d1d1f;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.events-reset-button:hover {
+    background: #6c4cff;
+}

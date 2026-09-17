@@ -38,16 +38,24 @@ const getEvents = async (req, res) => {
                 message: "Page not found"
             });
         }
-        const events = await Event.find(filter).skip(skip).limit(limitNumber);
-        const eventsWithRegistrationCount = await Promise.all(
-            events.map(async (event) => {
-                const registrationCount = await Registration.countDocuments({
-                    event: event._id
-                });
-                const remainingSeats = event.capacity - registrationCount;
-                return{ ...event.toObject(), registrationCount, remainingSeats};
-            })
-        );
+        const events = await Event.find(filter)
+            .sort({ date: 1 })
+            .skip(skip)
+            .limit(limitNumber);
+        const eventsWithRegistrationCount = events.map((event) => {
+            const registrationCount = event.registeredCount || 0;
+
+            const remainingSeats = Math.max(
+                event.capacity - registrationCount,
+                0
+            );
+
+            return {
+                ...event.toObject(),
+                registrationCount,
+                remainingSeats
+            };
+        });
 
         res.json({
             events: eventsWithRegistrationCount,
@@ -68,8 +76,19 @@ const getEvents = async (req, res) => {
 
 const createEvent = async (req, res) => {
     try{
-        const{ title, description, date, time, venue, category, capacity, banner } = req.body;
-        const event = await Event.create({ title, description, date, time, venue, category, capacity, banner, organiser: req.user.userId });
+        const{ title, description, date, time, venue, category,customCategory, capacity, banner } = req.body;
+        const event = await Event.create({
+        title,
+        description,
+        date,
+        time,
+        venue,
+        category,
+        customCategory,
+        capacity,
+        banner,
+        organiser: req.user.userId
+    });
         res.status(201).json(event);
     }
     catch (error){
@@ -101,7 +120,15 @@ const getEventById = async (req, res) => {
                 message: "Event not found"
             });
         }
-        res.json(event);
+        const registrationCount = await Registration.countDocuments({
+            event: id
+        });
+
+        const remainingSeats = Math.max(
+            event.capacity - registrationCount,
+            0
+        );
+        res.json({ ...event.toObject(), registrationCount, remainingSeats });
     }
     catch(error){   
         if(error.name === "CastError"){
@@ -125,7 +152,7 @@ const updateEvent = async (req, res) => {
                 message: "Invalid event ID"
             });
         }
-        const { title, description, date, time, venue, category, capacity, banner } = req.body;
+        const { title, description, date, time, venue, category,customCategory, capacity, banner } = req.body;
 
         const updates = {};
 
@@ -137,6 +164,7 @@ const updateEvent = async (req, res) => {
         if (category !== undefined) updates.category = category;
         if (capacity !== undefined) updates.capacity = capacity;
         if (banner !== undefined) updates.banner = banner;
+        if (customCategory !== undefined) updates.customCategory = customCategory;
 
         const event = await Event.findById(id);
 
@@ -153,9 +181,7 @@ const updateEvent = async (req, res) => {
         }
 
         if (capacity !== undefined) {
-            const registrationCount = await Registration.countDocuments({
-                event: id
-            });
+            const registrationCount = event.registeredCount || 0;
 
             if (capacity < registrationCount) {
                 return res.status(400).json({

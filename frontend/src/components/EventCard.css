@@ -1,0 +1,250 @@
+.event-card {
+    min-height: 440px;
+    display: flex;
+    flex-direction: column;
+
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(109, 74, 255, 0.4);
+    box-shadow: 0 25px 50px rgba(40, 30, 80, 0.14);
+}
+
+.event-card-image {
+    height: 190px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+        135deg,
+        #e5ddff,
+        #c9bbff
+    );
+}
+
+.event-card-image span {
+    color: var(--primary);
+    font-size: 52px;
+}
+
+.event-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    padding: 26px 30px 28px;
+}
+
+.event-category {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    margin-bottom: 16px;
+}
+
+.event-card h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 30px;
+    line-height: 1.2;
+
+    margin-bottom: 20px;
+}
+
+.event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.event-info p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.event-card a {
+    margin-top: auto;
+    padding-top: 24px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.event-card a span {
+    color: var(--primary);
+    font-size: 20px;
+
+    transition: transform 0.3s ease;
+}
+
+.event-card:hover a span {
+    transform: translateX(6px);
+}
+
+@media (max-width: 650px) {
+    .event-card {
+        min-height: 400px;
+    }
+
+    .event-card-content {
+        padding: 24px;
+    }
+
+    .event-card h3 {
+        font-size: 26px;
+    }
+}
+
+/* Event Card Image */
+
+.event-card-image {
+    overflow: hidden;
+}
+
+.event-card-image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.event-card:hover .event-card-image img {
+    transform: scale(1.04);
+}
+
+
+/* Event Card Footer */
+
+.event-card-footer {
+    margin-top: auto;
+    padding-top: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    border-top: 1px solid var(--border);
+}
+
+.event-seats {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* Discover Link */
+
+.event-card-footer .discover-link {
+    margin-top: 0;
+    padding-top: 0;
+
+    white-space: nowrap;
+}
+
+.event-card-footer .discover-link::after {
+    content: "";
+}
+
+
+/* Full Event */
+
+.event-seats {
+    letter-spacing: 0.2px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 650px) {
+
+    .event-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .event-card-footer .discover-link {
+        padding-top: 0;
+    }
+
+}
+
+.event-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.event-card-placeholder span {
+    color: var(--primary);
+    font-size: 48px;
+}
+
+.event-card-placeholder p {
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.event-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.event-card-meta .event-category {
+    margin-bottom: 0;
+}
+
+.event-status {
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.event-status.upcoming {
+    background: #eeeaff;
+    color: #6c4cff;
+}
+
+.event-status.today {
+    background: #e8f7ed;
+    color: #267a45;
+}
+
+.event-status.completed {
+    background: #eeeeee;
+    color: #77736f;
+}
