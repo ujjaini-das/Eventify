@@ -385,7 +385,9 @@ const getEventAttendance = async (req, res) => {
             });
         }
 
-        const event = await Event.findById(eventId);
+        const event = await Event.findById(eventId).select(
+            "title description date time venue category customCategory banner organiser"
+        );
 
         if (!event) {
             return res.status(404).json({
@@ -420,6 +422,16 @@ const getEventAttendance = async (req, res) => {
 
         res.json({
             eventId,
+            event: {
+                title: event.title,
+                description: event.description,
+                date: event.date,
+                time: event.time,
+                venue: event.venue,
+                category: event.category,
+                customCategory: event.customCategory,
+                banner: event.banner
+            },
             registered,
             checkedIn,
             notCheckedIn,

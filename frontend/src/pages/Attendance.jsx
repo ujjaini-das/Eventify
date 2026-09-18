@@ -10,6 +10,9 @@ import "./Attendance.css";
             const [loading, setLoading] = useState(true);
             const [message, setMessage] = useState("");
             const [refreshing, setRefreshing] = useState(false);    
+            const [searchTerm, setSearchTerm] = useState("");
+            const [statusFilter, setStatusFilter] = useState("all");
+            const [sortOption, setSortOption] = useState("newest");
 
             const fetchAttendance = async () => {
             try {
@@ -76,6 +79,111 @@ import "./Attendance.css";
             fetchAttendance();
         }, [id]);
 
+       const filteredAttendees = attendees
+            .filter((registration) => {
+                const name =
+                    registration.user?.name?.toLowerCase() || "";
+
+                const email =
+                    registration.user?.email?.toLowerCase() || "";
+
+                const search =
+                    searchTerm.toLowerCase().trim();
+
+                const matchesSearch =
+                    name.includes(search) ||
+                    email.includes(search);
+
+                const matchesStatus =
+                    statusFilter === "all" ||
+                    (statusFilter === "checked-in" &&
+                        registration.checkedIn) ||
+                    (statusFilter === "not-checked-in" &&
+                        !registration.checkedIn);
+
+                return matchesSearch && matchesStatus;
+            })
+            .sort((a, b) => {
+                if (sortOption === "name-asc") {
+                    return (a.user?.name || "").localeCompare(
+                        b.user?.name || ""
+                    );
+                }
+
+                if (sortOption === "name-desc") {
+                    return (b.user?.name || "").localeCompare(
+                        a.user?.name || ""
+                    );
+                }
+
+                if (sortOption === "oldest") {
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                }
+
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+
+    const handleExportCSV = () => {
+            if (attendees.length === 0) {
+                alert("There are no attendees to export.");
+                return;
+            }
+
+            const headers = [
+                "Name",
+                "Email",
+                "Ticket ID",
+                "Check-in Status",
+                "Check-in Time",
+                "Registration Date"
+            ];
+
+            const rows = filteredAttendees.map((registration) => [
+                registration.user?.name || "",
+                registration.user?.email || "",
+                registration.ticketId || "",
+                registration.checkedIn
+                    ? "Checked In"
+                    : "Not Checked In",
+                registration.checkedInAt
+                    ? new Date(registration.checkedInAt).toLocaleString("en-IN")
+                    : "",
+                registration.createdAt
+                    ? new Date(registration.createdAt).toLocaleString("en-IN")
+                    : ""
+            ]);
+
+            const csvContent = [
+                headers,
+                ...rows
+            ]
+                .map((row) =>
+                    row
+                        .map((value) =>
+                            `"${String(value).replace(/"/g, '""')}"`
+                        )
+                        .join(",")
+                )
+                .join("\n");
+
+            const blob = new Blob(
+                [csvContent],
+                { type: "text/csv;charset=utf-8;" }
+            );
+
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "eventify-attendees.csv";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+        };
+
     if (loading) {
         return (
             <div className="attendance-state">
@@ -115,6 +223,44 @@ import "./Attendance.css";
                         Track registrations and attendee check-ins
                         for this event.
                     </p>
+
+                    <div className="attendance-event-details">
+
+                        <h2>
+                            {attendance.event.title}
+                        </h2>
+
+                        <div className="attendance-event-meta">
+
+                            <span>
+                                {new Date(attendance.event.date).toLocaleDateString(
+                                    "en-IN",
+                                    {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric"
+                                    }
+                                )}
+                            </span>
+
+                            <span>
+                                {attendance.event.time}
+                            </span>
+
+                            <span>
+                                {attendance.event.venue}
+                            </span>
+
+                            <span>
+                                {attendance.event.category === "Other" &&
+                                attendance.event.customCategory
+                                    ? attendance.event.customCategory
+                                    : attendance.event.category}
+                            </span>
+
+                        </div>
+
+                    </div>
                 </div>
 
                 <Link
@@ -184,72 +330,127 @@ import "./Attendance.css";
 
                     <div className="attendees-header-actions">
 
-                        <span>
-                            {attendees.length} attendees
-                        </span>
+                            <span>
+                                {filteredAttendees.length} of {attendees.length} attendees
+                            </span>
+
+                            <button
+                                className="attendance-export-btn"
+                                onClick={handleExportCSV}
+                            >
+                                ↓ Export CSV
+                            </button>
+
+                            <button
+                                className="attendance-refresh-btn"
+                                onClick={fetchAttendance}
+                                disabled={refreshing}
+                            >
+                                {refreshing ? "Refreshing..." : "↻ Refresh"}
+                            </button>
+
+                        </div>
+
+                </div>
+
+                <div className="attendee-filters">
+
+                        <input
+                            type="text"
+                            placeholder="Search by name or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="all">All Attendees</option>
+                            <option value="checked-in">Checked In</option>
+                            <option value="not-checked-in">Not Checked In</option>
+                        </select>
+
+                        <select
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value)}
+                        >
+                            <option value="newest">Newest Registration</option>
+                            <option value="oldest">Oldest Registration</option>
+                            <option value="name-asc">Name A → Z</option>
+                            <option value="name-desc">Name Z → A</option>
+                        </select>
 
                         <button
-                            className="attendance-refresh-btn"
-                            onClick={fetchAttendance}
-                            disabled={refreshing}
+                            className="clear-filters-btn"
+                            onClick={() => {
+                                setSearchTerm("");
+                                setStatusFilter("all");
+                                setSortOption("newest");
+                            }}
                         >
-                             {refreshing ? "Refreshing..." : "↻ Refresh"}
+                            Clear
                         </button>
 
                     </div>
 
-                </div>
-
                 {attendees.length === 0 ? (
-                    <div className="attendees-empty">
-                        <p>No one has registered for this event yet.</p>
-                    </div>
-                ) : (
-                    <div className="attendees-list">
+                        <div className="attendees-empty">
+                            <p>No one has registered for this event yet.</p>
+                        </div>
+                    ) : filteredAttendees.length === 0 ? (
+                        <div className="attendees-empty">
+                            <p>No attendees found.</p>
+                            <span>
+                                Try changing your search or filter.
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="attendees-list">
 
-                        {attendees.map((registration) => (
-                            <div
-                                className="attendee-row"
-                                key={registration._id}
-                            >
-
-                                <div className="attendee-info">
-
-                                    <strong>
-                                        {registration.user?.name}
-                                    </strong>
-
-                                    <span>
-                                        {registration.user?.email}
-                                    </span>
-
-                                </div>
-
-                                <div className="attendee-ticket">
-
-                                    <span>
-                                        {registration.ticketId}
-                                    </span>
-
-                                </div>
-
+                            {filteredAttendees.map((registration) => (
                                 <div
-                                    className={
-                                        registration.checkedIn
-                                            ? "attendee-status checked-in"
-                                            : "attendee-status not-checked-in"
-                                    }
+                                    className="attendee-row"
+                                    key={registration._id}
                                 >
-                                    {registration.checkedIn
-                                        ? "✓ Checked In"
-                                        : "Not Checked In"}
+
+                                    <div className="attendee-info">
+
+                                        <strong>
+                                            {registration.user?.name}
+                                        </strong>
+
+                                        <span>
+                                            {registration.user?.email}
+                                        </span>
+
+                                    </div>
+
+                                    <div className="attendee-ticket">
+
+                                        <span>
+                                            {registration.ticketId}
+                                        </span>
+
+                                    </div>
+
+                                    <div
+                                        className={
+                                            registration.checkedIn
+                                                ? "attendee-status checked-in"
+                                                : "attendee-status not-checked-in"
+                                        }
+                                    >
+                                        {registration.checkedIn
+                                            ? "✓ Checked In"
+                                            : "Not Checked In"}
+                                    </div>
+
                                 </div>
+                            ))}
 
-                            </div>
-                        ))}
-
-                    </div>
-                )}
+                        </div>
+                    )}
 
             </div>
 

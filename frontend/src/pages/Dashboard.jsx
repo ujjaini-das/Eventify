@@ -265,10 +265,21 @@ function Dashboard() {
                                     ></div>
                                 </div>
 
-                                <p className="attendance-summary">
-                                    {attendance[event._id]?.checkedIn || 0} of{" "}
-                                    {attendance[event._id]?.registered || 0} attendees checked in
-                                </p>
+                                <div className="attendance-summary-row">
+
+                                    <p className="attendance-summary">
+                                        {attendance[event._id]?.checkedIn || 0} of{" "}
+                                        {attendance[event._id]?.registered || 0} attendees checked in
+                                    </p>
+
+                                    <Link
+                                        to={`/dashboard/events/${event._id}/attendance`}
+                                        className="attendance-details-link"
+                                    >
+                                        View Details →
+                                    </Link>
+
+                                </div>
 
                             </div>
 
