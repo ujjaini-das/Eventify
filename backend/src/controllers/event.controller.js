@@ -1,6 +1,12 @@
 const Event = require("../models/event.model");
 const Registration = require("../models/registration.model");
 const mongoose = require("mongoose");
+const uploadToCloudinary = require("../utils/uploadToCloudinary");
+const deleteFromCloudinary = require("../utils/deleteFromCloudinary");
+
+const escapeRegex = (value) => {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
 
 const getEvents = async (req, res) => {
     try{
@@ -24,11 +30,28 @@ const getEvents = async (req, res) => {
         if (category){
             filter.category = category;
         }
-        if(search) {
-            filter.title = {
-                $regex: search,
-                $options: "i"
-            };
+        if (search) {
+
+            if (typeof search !== "string") {
+                return res.status(400).json({
+                    message: "Search must be a valid string"
+                });
+            }
+
+            const trimmedSearch = search.trim();
+
+            if (trimmedSearch.length > 100) {
+                return res.status(400).json({
+                    message: "Search cannot exceed 100 characters"
+                });
+            }
+
+            if (trimmedSearch) {
+                filter.title = {
+                    $regex: escapeRegex(trimmedSearch),
+                    $options: "i"
+                };
+            }
         }
 
         const totalEvents = await Event.countDocuments(filter);
@@ -75,24 +98,50 @@ const getEvents = async (req, res) => {
 };
 
 const createEvent = async (req, res) => {
-    try{
-        const{ title, description, date, time, venue, category,customCategory, capacity, banner } = req.body;
+    try {
+        const {
+            title,
+            description,
+            date,
+            time,
+            venue,
+            category,
+            customCategory,
+            capacity,
+            banner
+        } = req.body;
+
+        let bannerUrl = banner || "";
+        let bannerPublicId = "";
+
+        if (req.file) {
+            const uploadResult = await uploadToCloudinary(
+                req.file.buffer
+            );
+
+            bannerUrl = uploadResult.secure_url;
+            bannerPublicId = uploadResult.public_id;
+        }
+
         const event = await Event.create({
-        title,
-        description,
-        date,
-        time,
-        venue,
-        category,
-        customCategory,
-        capacity,
-        banner,
-        organiser: req.user.userId
-    });
+            title,
+            description,
+            date,
+            time,
+            venue,
+            category,
+            customCategory,
+            capacity,
+            banner: bannerUrl,
+            bannerPublicId,
+            organiser: req.user.userId
+        });
+
         res.status(201).json(event);
-    }
-    catch (error){
-         if (error.name === "ValidationError") {
+
+    } catch (error) {
+
+        if (error.name === "ValidationError") {
             return res.status(400).json({
                 message: error.message
             });
@@ -145,26 +194,26 @@ const getEventById = async (req, res) => {
 };
 
 const updateEvent = async (req, res) => {
-    try{
+    try {
         const id = req.params.id;
-                if (!mongoose.Types.ObjectId.isValid(id)) {
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 message: "Invalid event ID"
             });
         }
-        const { title, description, date, time, venue, category,customCategory, capacity, banner } = req.body;
 
-        const updates = {};
-
-        if (title !== undefined) updates.title = title;
-        if (description !== undefined) updates.description = description;
-        if (date !== undefined) updates.date = date;
-        if (time !== undefined) updates.time = time;
-        if (venue !== undefined) updates.venue = venue;
-        if (category !== undefined) updates.category = category;
-        if (capacity !== undefined) updates.capacity = capacity;
-        if (banner !== undefined) updates.banner = banner;
-        if (customCategory !== undefined) updates.customCategory = customCategory;
+        const {
+            title,
+            description,
+            date,
+            time,
+            venue,
+            category,
+            customCategory,
+            capacity,
+            banner
+        } = req.body;
 
         const event = await Event.findById(id);
 
@@ -174,7 +223,10 @@ const updateEvent = async (req, res) => {
             });
         }
 
-        if (event.organiser.toString() !== req.user.userId && req.user.role !== "admin") {
+        if (
+            event.organiser.toString() !== String(req.user.userId) &&
+            req.user.role !== "admin"
+        ) {
             return res.status(403).json({
                 message: "You are not allowed to modify this event"
             });
@@ -185,9 +237,48 @@ const updateEvent = async (req, res) => {
 
             if (capacity < registrationCount) {
                 return res.status(400).json({
-                    message: "Capacity cannot be less than the current number of registrations"
+                    message:
+                        "Capacity cannot be less than the current number of registrations"
                 });
             }
+        }
+
+        const updates = {};
+
+        if (title !== undefined) updates.title = title;
+        if (description !== undefined) updates.description = description;
+        if (date !== undefined) updates.date = date;
+        if (time !== undefined) updates.time = time;
+        if (venue !== undefined) updates.venue = venue;
+        if (category !== undefined) updates.category = category;
+        if (capacity !== undefined) updates.capacity = capacity;
+        if (customCategory !== undefined) {
+            updates.customCategory = customCategory;
+        }
+
+       if (req.file) {
+            const oldBannerPublicId = event.bannerPublicId;
+
+            const uploadResult = await uploadToCloudinary(
+                req.file.buffer
+            );
+
+            updates.banner = uploadResult.secure_url;
+            updates.bannerPublicId = uploadResult.public_id;
+
+            if (oldBannerPublicId) {
+                try {
+                    await deleteFromCloudinary(oldBannerPublicId);
+                } catch (deleteError) {
+                    console.error(
+                        "Old Cloudinary image could not be deleted:",
+                        deleteError.message
+                    );
+                }
+            }
+
+        } else if (banner !== undefined) {
+            updates.banner = banner;
         }
 
         const updatedEvent = await Event.findByIdAndUpdate(
@@ -201,15 +292,16 @@ const updateEvent = async (req, res) => {
 
         res.json(updatedEvent);
 
+    } catch (error) {
 
-    }catch (error) {
-        
         if (error.name === "ValidationError") {
             return res.status(400).json({
                 message: error.message
             });
         }
+
         console.error("UPDATE EVENT ERROR:", error);
+
         res.status(500).json({
             message: "Failed to update event"
         });
@@ -232,10 +324,24 @@ const deleteEvent = async (req, res) => {
             });
         }
 
-        if (event.organiser.toString() !== req.user.userId && req.user.role !== "admin") {
+       if (
+            event.organiser.toString() !== String(req.user.userId) &&
+            req.user.role !== "admin"
+        ) {
             return res.status(403).json({
                 message: "You are not allowed to delete this event"
             });
+        }
+
+        if (event.bannerPublicId) {
+            try {
+                await deleteFromCloudinary(event.bannerPublicId);
+            } catch (deleteError) {
+                console.error(
+                    "Event deleted, but Cloudinary image could not be deleted:",
+                    deleteError.message
+                );
+            }
         }
 
         await Registration.deleteMany({

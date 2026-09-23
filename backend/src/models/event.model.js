@@ -26,7 +26,9 @@ const eventSchema = new mongoose.Schema({
     },
     time: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        match: /^([01]\d|2[0-3]):([0-5]\d)$/
     },
     venue: {
         type: String,
@@ -50,7 +52,8 @@ const eventSchema = new mongoose.Schema({
     },
     customCategory: {
         type: String,
-        trim: true
+        trim: true,
+        maxlength: 50
     },
     capacity: {
         type: Number,
@@ -65,7 +68,14 @@ const eventSchema = new mongoose.Schema({
     },
     banner: {
         type: String,
-        default: ""
+        default: "",
+        maxlength: 1000
+    },
+
+    bannerPublicId: {
+        type: String,
+        default: "",
+        maxlength: 300
     },
     organiser: {
         type: mongoose.Schema.Types.ObjectId,

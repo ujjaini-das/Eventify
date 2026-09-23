@@ -128,6 +128,22 @@ function MyEvents() {
                                 className="my-event-card"
                                 key={registration._id}
                             >
+                                <div className="my-event-card-image">
+                                    {event.banner ? (
+                                        <img
+                                            src={event.banner}
+                                            alt={event.title}
+                                            onError={(e) => {
+                                                e.currentTarget.src = "/eventify.png";
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="my-event-card-placeholder">
+                                            <span>✦</span>
+                                            <p>EVENTIFY</p>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="my-event-category">
                                     {event.category === "Other" && event.customCategory
                                         ? event.customCategory

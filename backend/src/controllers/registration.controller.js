@@ -2,6 +2,7 @@ const Registration = require("../models/registration.model");
 const Event = require("../models/event.model");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const sendEmail = require("../utils/email");
 
 const generateTicketId = () => {
     return `EVT-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
@@ -112,9 +113,239 @@ const registerForEvent = async (req, res) => {
                 "event",
                 "title date time venue category customCategory banner"
             )
+            .populate(
+                "user",
+                "name email"
+            )
             .session(session);
 
         await session.commitTransaction();
+
+        try {
+            await sendEmail({
+                to: populatedRegistration.user.email,
+                subject: `Registration Confirmed - ${populatedRegistration.event.title}`,
+                html: `
+                    <div style="
+                        margin: 0;
+                        padding: 40px 20px;
+                        background: #f5f5f5;
+                        font-family: Arial, Helvetica, sans-serif;
+                    ">
+
+                        <div style="
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background: #ffffff;
+                            border-radius: 16px;
+                            overflow: hidden;
+                            border: 1px solid #e5e5e5;
+                        ">
+
+                            <!-- Header -->
+
+                            <div style="
+                                padding: 28px 32px;
+                                border-bottom: 1px solid #eeeeee;
+                            ">
+                                <h1 style="
+                                    margin: 0;
+                                    font-size: 24px;
+                                    color: #111111;
+                                ">
+                                    Eventify
+                                </h1>
+
+                                <p style="
+                                    margin: 6px 0 0;
+                                    color: #777777;
+                                    font-size: 13px;
+                                ">
+                                    Experiences worth remembering.
+                                </p>
+                            </div>
+
+
+                            <!-- Main Content -->
+
+                            <div style="
+                                padding: 32px;
+                            ">
+
+                                <div style="
+                                    display: inline-block;
+                                    padding: 7px 12px;
+                                    background: #f0fdf4;
+                                    color: #15803d;
+                                    border-radius: 20px;
+                                    font-size: 12px;
+                                    font-weight: bold;
+                                ">
+                                    REGISTRATION CONFIRMED
+                                </div>
+
+                                <h2 style="
+                                    margin: 20px 0 10px;
+                                    font-size: 28px;
+                                    color: #111111;
+                                ">
+                                    You're all set! 🎉
+                                </h2>
+
+                                <p style="
+                                    color: #555555;
+                                    font-size: 15px;
+                                    line-height: 1.7;
+                                ">
+                                    Hello <strong>${populatedRegistration.user.name}</strong>,
+                                </p>
+
+                                <p style="
+                                    color: #555555;
+                                    font-size: 15px;
+                                    line-height: 1.7;
+                                ">
+                                    Your registration for
+                                    <strong>${populatedRegistration.event.title}</strong>
+                                    has been successfully confirmed.
+                                </p>
+
+
+                                <!-- Event Details -->
+
+                                <div style="
+                                    margin-top: 28px;
+                                    padding: 22px;
+                                    background: #fafafa;
+                                    border: 1px solid #eeeeee;
+                                    border-radius: 12px;
+                                ">
+
+                                    <h3 style="
+                                        margin: 0 0 18px;
+                                        font-size: 16px;
+                                        color: #111111;
+                                    ">
+                                        Event Details
+                                    </h3>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Date:</strong>
+                                        ${new Date(
+                                            populatedRegistration.event.date
+                                        ).toLocaleDateString("en-IN")}
+                                    </p>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Time:</strong>
+                                        ${populatedRegistration.event.time}
+                                    </p>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Venue:</strong>
+                                        ${populatedRegistration.event.venue}
+                                    </p>
+
+                                </div>
+
+
+                                <!-- Ticket -->
+
+                                <div style="
+                                    margin-top: 24px;
+                                    padding: 24px;
+                                    text-align: center;
+                                    background: #111111;
+                                    border-radius: 12px;
+                                ">
+
+                                    <p style="
+                                        margin: 0 0 10px;
+                                        color: #aaaaaa;
+                                        font-size: 12px;
+                                        text-transform: uppercase;
+                                        letter-spacing: 1px;
+                                    ">
+                                        Your Ticket ID
+                                    </p>
+
+                                    <p style="
+                                        margin: 0;
+                                        color: #ffffff;
+                                        font-size: 24px;
+                                        font-weight: bold;
+                                        letter-spacing: 2px;
+                                    ">
+                                        ${populatedRegistration.ticketId}
+                                    </p>
+
+                                </div>
+
+
+                                <p style="
+                                    margin-top: 24px;
+                                    color: #666666;
+                                    font-size: 13px;
+                                    line-height: 1.6;
+                                ">
+                                    Please keep your Ticket ID safe. It will be used
+                                    during event check-in.
+                                </p>
+
+                                <p style="
+                                    margin-top: 28px;
+                                    color: #555555;
+                                    font-size: 14px;
+                                ">
+                                    Thank you for choosing Eventify.
+                                </p>
+
+                            </div>
+
+
+                            <!-- Footer -->
+
+                            <div style="
+                                padding: 20px 32px;
+                                background: #fafafa;
+                                border-top: 1px solid #eeeeee;
+                            ">
+
+                                <p style="
+                                    margin: 0;
+                                    color: #999999;
+                                    font-size: 12px;
+                                    line-height: 1.5;
+                                ">
+                                    This is an automated email from Eventify.
+                                    Please do not reply to this email.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `
+            });
+        } catch (emailError) {
+            console.error(
+                "Registration successful, but confirmation email failed:",
+                emailError.message
+            );
+        }
 
         res.status(201).json({
             message: "Successfully registered for the event",
@@ -174,7 +405,10 @@ const getEventRegistrations = async (req,res) => {
             });
         }
 
-        if(event.organiser.toString() !== req.user.userId && req.user.role !== "admin"){
+       if (
+            event.organiser.toString() !== String(req.user.userId) &&
+            req.user.role !== "admin"
+        ) {
             return res.status(403).json({
                 message: "You are not authorized to view registrations for this event"
             });
@@ -213,7 +447,16 @@ const cancelRegistration = async (req, res) => {
         const registration = await Registration.findOne({
             user: req.user.userId,
             event: eventId
-        }).session(session);
+        })
+            .populate(
+                "user",
+                "name email"
+            )
+            .populate(
+                "event",
+                "title date time venue category customCategory"
+            )
+            .session(session);
 
         if (!registration) {
             await session.abortTransaction();
@@ -244,6 +487,200 @@ const cancelRegistration = async (req, res) => {
         );
 
         await session.commitTransaction();
+
+        try {
+            await sendEmail({
+                to: registration.user.email,
+                subject: `Registration Cancelled - ${registration.event.title}`,
+                html: `
+                    <div style="
+                        margin: 0;
+                        padding: 40px 20px;
+                        background: #f5f5f5;
+                        font-family: Arial, Helvetica, sans-serif;
+                    ">
+
+                        <div style="
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background: #ffffff;
+                            border-radius: 16px;
+                            overflow: hidden;
+                            border: 1px solid #e5e5e5;
+                        ">
+
+                            <!-- Header -->
+
+                            <div style="
+                                padding: 28px 32px;
+                                border-bottom: 1px solid #eeeeee;
+                            ">
+                                <h1 style="
+                                    margin: 0;
+                                    font-size: 24px;
+                                    color: #111111;
+                                ">
+                                    Eventify
+                                </h1>
+
+                                <p style="
+                                    margin: 6px 0 0;
+                                    color: #777777;
+                                    font-size: 13px;
+                                ">
+                                    Experiences worth remembering.
+                                </p>
+                            </div>
+
+
+                            <!-- Main Content -->
+
+                            <div style="
+                                padding: 32px;
+                            ">
+
+                                <div style="
+                                    display: inline-block;
+                                    padding: 7px 12px;
+                                    background: #fef2f2;
+                                    color: #dc2626;
+                                    border-radius: 20px;
+                                    font-size: 12px;
+                                    font-weight: bold;
+                                ">
+                                    REGISTRATION CANCELLED
+                                </div>
+
+                                <h2 style="
+                                    margin: 20px 0 10px;
+                                    font-size: 28px;
+                                    color: #111111;
+                                ">
+                                    Registration Cancelled
+                                </h2>
+
+                                <p style="
+                                    color: #555555;
+                                    font-size: 15px;
+                                    line-height: 1.7;
+                                ">
+                                    Hello <strong>${registration.user.name}</strong>,
+                                </p>
+
+                                <p style="
+                                    color: #555555;
+                                    font-size: 15px;
+                                    line-height: 1.7;
+                                ">
+                                    Your registration for
+                                    <strong>${registration.event.title}</strong>
+                                    has been successfully cancelled.
+                                </p>
+
+
+                                <!-- Event Details -->
+
+                                <div style="
+                                    margin-top: 28px;
+                                    padding: 22px;
+                                    background: #fafafa;
+                                    border: 1px solid #eeeeee;
+                                    border-radius: 12px;
+                                ">
+
+                                    <h3 style="
+                                        margin: 0 0 18px;
+                                        font-size: 16px;
+                                        color: #111111;
+                                    ">
+                                        Event Details
+                                    </h3>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Date:</strong>
+                                        ${new Date(
+                                            registration.event.date
+                                        ).toLocaleDateString("en-IN")}
+                                    </p>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Time:</strong>
+                                        ${registration.event.time}
+                                    </p>
+
+                                    <p style="
+                                        margin: 10px 0;
+                                        color: #555555;
+                                        font-size: 14px;
+                                    ">
+                                        <strong>Venue:</strong>
+                                        ${registration.event.venue}
+                                    </p>
+
+                                </div>
+
+
+                                <p style="
+                                    margin-top: 24px;
+                                    color: #666666;
+                                    font-size: 13px;
+                                    line-height: 1.6;
+                                ">
+                                    Your ticket is no longer valid for this event.
+                                    You can register again if registrations are still open
+                                    and seats are available.
+                                </p>
+
+                                <p style="
+                                    margin-top: 28px;
+                                    color: #555555;
+                                    font-size: 14px;
+                                ">
+                                    Thank you for using Eventify.
+                                </p>
+
+                            </div>
+
+
+                            <!-- Footer -->
+
+                            <div style="
+                                padding: 20px 32px;
+                                background: #fafafa;
+                                border-top: 1px solid #eeeeee;
+                            ">
+
+                                <p style="
+                                    margin: 0;
+                                    color: #999999;
+                                    font-size: 12px;
+                                    line-height: 1.5;
+                                ">
+                                    This is an automated email from Eventify.
+                                    Please do not reply to this email.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `
+            });
+        } catch (emailError) {
+            console.error(
+                "Registration cancelled, but cancellation email failed:",
+                emailError.message
+            );
+        }
 
         res.json({
             message: "Registration cancelled successfully"
@@ -301,10 +738,13 @@ const getMyRegistrationById = async (req, res) => {
 const checkInAttendee = async (req, res) => {
     try {
         const { ticketId, eventId } = req.body;
-
-        if (!ticketId) {
+        
+        if (
+            typeof ticketId !== "string" ||
+            !ticketId.trim()
+        ) {
             return res.status(400).json({
-                message: "Ticket ID is required"
+                message: "Valid Ticket ID is required"
             });
         }
 
@@ -335,25 +775,43 @@ const checkInAttendee = async (req, res) => {
         }
 
         if (
-            registration.event.organiser.toString() !== req.user.userId &&
+            registration.event.organiser.toString() !== String(req.user.userId) &&
             req.user.role !== "admin"
         ) {
             return res.status(403).json({
                 message: "You are not authorized to check in this attendee"
             });
         }
+        
+        const checkInTime = new Date();
 
-        if (registration.checkedIn) {
+        const updatedRegistration = await Registration.findOneAndUpdate(
+            {
+                _id: registration._id,
+                checkedIn: false
+            },
+            {
+                $set: {
+                    checkedIn: true,
+                    checkedInAt: checkInTime
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!updatedRegistration) {
+            const existingRegistration = await Registration.findById(
+                registration._id
+            ).select("checkedIn checkedInAt");
+
             return res.status(409).json({
                 message: "Attendee is already checked in",
-                checkedInAt: registration.checkedInAt
+                checkedInAt: existingRegistration?.checkedInAt || null
             });
         }
-
-        registration.checkedIn = true;
-        registration.checkedInAt = new Date();
-
-        await registration.save();
 
         const populatedRegistration = await Registration.findById(
             registration._id
@@ -396,7 +854,7 @@ const getEventAttendance = async (req, res) => {
         }
 
         if (
-            event.organiser.toString() !== req.user.userId &&
+            event.organiser.toString() !== String(req.user.userId) &&
             req.user.role !== "admin"
         ) {
             return res.status(403).json({

@@ -9,6 +9,46 @@ const formatDate = (date) => {
     });
 };
 
+const getEventStatus = (date, time, registeredCount, capacity) => {
+    const eventDateTime = new Date(date);
+
+    if (time) {
+        const [hours, minutes] = time
+            .split(":")
+            .map(Number);
+
+        eventDateTime.setHours(
+            hours,
+            minutes,
+            0,
+            0
+        );
+    }
+
+    if (eventDateTime <= new Date()) {
+        return "Past";
+    }
+
+    if (registeredCount >= capacity) {
+        return "Full";
+    }
+
+    return "Upcoming";
+};
+
+const getRegistrationRate = (event) => {
+    if (!event.capacity || event.capacity <= 0) {
+        return 0;
+    }
+
+    return Math.min(
+        Math.round(
+            ((event.registrationCount || 0) / event.capacity) * 100
+        ),
+        100
+    );
+};
+
 function Dashboard() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -143,6 +183,26 @@ function Dashboard() {
     }
     };
 
+    const upcomingEvents = events.filter(
+        (event) =>
+            getEventStatus(
+                event.date,
+                event.time,
+                event.registrationCount || 0,
+                event.capacity
+            ) === "Upcoming"
+    ).length;
+
+    const fullEvents = events.filter(
+        (event) =>
+            getEventStatus(
+                event.date,
+                event.time,
+                event.registrationCount || 0,
+                event.capacity
+            ) === "Full"
+    ).length;
+
     return (
         <section className="dashboard-page">
             <div className="dashboard-header">
@@ -166,6 +226,27 @@ function Dashboard() {
                 </Link>
             </div>
 
+            {events.length > 0 && (
+                <div className="dashboard-summary">
+
+                    <div className="dashboard-summary-card">
+                        <span>Total Events</span>
+                        <strong>{events.length}</strong>
+                    </div>
+
+                    <div className="dashboard-summary-card upcoming">
+                        <span>Upcoming</span>
+                        <strong>{upcomingEvents}</strong>
+                    </div>
+
+                    <div className="dashboard-summary-card full">
+                        <span>Full</span>
+                        <strong>{fullEvents}</strong>
+                    </div>
+
+                </div>
+            )}
+
             {events.length === 0 ? (
                 <div className="dashboard-empty">
                     <h2>No events created yet.</h2>
@@ -188,11 +269,43 @@ function Dashboard() {
                             className="dashboard-card"
                             key={event._id}
                         >
+                            <div className="dashboard-card-image">
+                                {event.banner ? (
+                                    <img
+                                        src={event.banner}
+                                        alt={event.title}
+                                        onError={(e) => {
+                                            e.currentTarget.src = "/eventify.png";
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="dashboard-card-placeholder">
+                                        <span>✦</span>
+                                        <p>EVENTIFY</p>
+                                    </div>
+                                )}
+                            </div>
                             <p className="dashboard-category">
                                 {event.category === "Other" && event.customCategory
                                     ? event.customCategory
                                     : event.category}
                             </p>
+                            <span
+                                className={`event-status ${getEventStatus(
+                                    event.date,
+                                    event.time,
+                                    event.registrationCount || 0,
+                                    event.capacity
+                                )
+                                    .toLowerCase()}`}
+                            >
+                                {getEventStatus(
+                                    event.date,
+                                    event.time,
+                                    event.registrationCount || 0,
+                                    event.capacity
+                                )}
+                            </span>
 
                             <h2>{event.title}</h2>
 
@@ -209,10 +322,17 @@ function Dashboard() {
                                     <span>Registered</span>
                                 </div>
 
-                                <div>
+                                <div
+                                    className={
+                                        event.remainingSeats <= 5
+                                            ? "spots-left warning"
+                                            : "spots-left"
+                                    }
+                                >
                                     <strong>
                                         {event.remainingSeats}
                                     </strong>
+
                                     <span>Spots Left</span>
                                 </div>
 
@@ -242,6 +362,41 @@ function Dashboard() {
                                         {attendance[event._id]?.attendanceRate || 0}%
                                     </strong>
                                     <span>Attendance</span>
+                                </div>
+
+                            </div>
+
+                            <div className="capacity-progress">
+
+                                <div className="capacity-progress-header">
+                                    <span>Capacity</span>
+
+                                    <strong>
+                                        {event.registrationCount || 0} / {event.capacity}
+                                    </strong>
+
+                                    <span
+                                        className={
+                                            event.remainingSeats <= 5
+                                                ? "capacity-rate warning"
+                                                : "capacity-rate"
+                                        }
+                                    >
+                                        {getRegistrationRate(event)}% filled
+                                    </span>
+                                </div>
+
+                                <div className="capacity-progress-track">
+                                    <div
+                                        className={
+                                            event.remainingSeats <= 5
+                                                ? "capacity-progress-fill warning"
+                                                : "capacity-progress-fill"
+                                        }
+                                        style={{
+                                            width: `${getRegistrationRate(event)}%`
+                                        }}
+                                    ></div>
                                 </div>
 
                             </div>

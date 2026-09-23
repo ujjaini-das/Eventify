@@ -226,37 +226,57 @@ import "./Attendance.css";
 
                     <div className="attendance-event-details">
 
-                        <h2>
-                            {attendance.event.title}
-                        </h2>
+                        <div className="attendance-event-banner">
+                            {attendance.event.banner ? (
+                                <img
+                                    src={attendance.event.banner}
+                                    alt={attendance.event.title}
+                                    onError={(e) => {
+                                        e.currentTarget.src = "/eventify.png";
+                                    }}
+                                />
+                            ) : (
+                                <div className="attendance-event-banner-placeholder">
+                                    <span>✦</span>
+                                </div>
+                            )}
+                        </div>
 
-                        <div className="attendance-event-meta">
+                        <div className="attendance-event-content">
 
-                            <span>
-                                {new Date(attendance.event.date).toLocaleDateString(
-                                    "en-IN",
-                                    {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric"
-                                    }
-                                )}
-                            </span>
+                            <h2>
+                                {attendance.event.title}
+                            </h2>
 
-                            <span>
-                                {attendance.event.time}
-                            </span>
+                            <div className="attendance-event-meta">
 
-                            <span>
-                                {attendance.event.venue}
-                            </span>
+                                <span>
+                                    {new Date(attendance.event.date).toLocaleDateString(
+                                        "en-IN",
+                                        {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric"
+                                        }
+                                    )}
+                                </span>
 
-                            <span>
-                                {attendance.event.category === "Other" &&
-                                attendance.event.customCategory
-                                    ? attendance.event.customCategory
-                                    : attendance.event.category}
-                            </span>
+                                <span>
+                                    {attendance.event.time}
+                                </span>
+
+                                <span>
+                                    {attendance.event.venue}
+                                </span>
+
+                                <span>
+                                    {attendance.event.category === "Other" &&
+                                    attendance.event.customCategory
+                                        ? attendance.event.customCategory
+                                        : attendance.event.category}
+                                </span>
+
+                            </div>
 
                         </div>
 

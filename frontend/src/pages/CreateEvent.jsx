@@ -12,10 +12,12 @@ function CreateEvent() {
         time: "",
         venue: "",
         category: "",
+        customCategory: "",
         capacity: "",
         banner: "",
     });
 
+    const [image, setImage] = useState(null);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -28,6 +30,17 @@ function CreateEvent() {
         }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+
+        if (!file) {
+            setImage(null);
+            return;
+        }
+
+        setImage(file);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -37,32 +50,52 @@ function CreateEvent() {
 
             const token = localStorage.getItem("token");
 
+            const data = new FormData();
+
+            data.append("title", formData.title);
+            data.append("description", formData.description);
+            data.append("date", formData.date);
+            data.append("time", formData.time);
+            data.append("venue", formData.venue);
+            data.append("category", formData.category);
+            data.append(
+                "customCategory",
+                formData.customCategory || ""
+            );
+            data.append("capacity", formData.capacity);
+
+            if (formData.banner) {
+                data.append("banner", formData.banner);
+            }
+
+            if (image) {
+                data.append("image", image);
+            }
+
             const response = await fetch(
                 "http://localhost:5000/api/events",
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({
-                        ...formData,
-                        capacity: Number(formData.capacity),
-                    }),
+                    body: data,
                 }
             );
 
-            const data = await response.json();
+            const responseData = await response.json();
 
             if (!response.ok) {
                 throw new Error(
-                    data.message || "Failed to create event"
+                    responseData.message || "Failed to create event"
                 );
             }
 
             navigate("/dashboard");
+
         } catch (error) {
             setMessage(error.message);
+
         } finally {
             setLoading(false);
         }
@@ -205,7 +238,21 @@ function CreateEvent() {
                         </div>
 
                     <div className="form-group">
-                        <label>Banner URL (Optional)</label>
+                        <label>Event Banner (Optional)</label>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                        />
+
+                        <small>
+                            Upload JPG, PNG, or WebP image. Maximum size: 5 MB.
+                        </small>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Or use Banner URL (Optional)</label>
 
                         <input
                             type="text"

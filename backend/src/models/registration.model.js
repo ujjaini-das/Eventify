@@ -15,8 +15,11 @@ const registrationSchema = new mongoose.Schema({
 
     ticketId: {
         type: String,
+        required: true,
         unique: true,
-        index: true
+        index: true,
+        trim: true,
+        maxlength: 100
     },
 
     checkedIn: {
@@ -31,7 +34,6 @@ const registrationSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// Prevent duplicate registration for the same user and event
 registrationSchema.index(
     { user: 1, event: 1 },
     { unique: true }

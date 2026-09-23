@@ -216,6 +216,9 @@ const EventDetails = () => {
                         <img
                             src={event.banner}
                             alt={event.title}
+                            onError={(e) => {
+                                e.currentTarget.src = "/eventify.png";
+                            }}
                         />
                     ) : (
                         <div className="event-details-placeholder">
