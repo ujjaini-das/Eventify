@@ -33,6 +33,12 @@ app.use("/api/auth", apiLimiter, authRoutes);
 
 const registrationRoutes = require("./routes/registration.routes");
 app.use("/api/registrations", apiLimiter, registrationRoutes);
+app.get("/health", (req, res) => {
+    res.json({
+        message: "Eventify backend is running",
+        environment: process.env.NODE_ENV || "not set"
+    });
+});
 app.use((req, res) => {
     res.status(404).json({
         message: "API route not found"
