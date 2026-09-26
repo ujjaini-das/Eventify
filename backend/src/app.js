@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 const app = express();
+app.set("trust proxy", 1);
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 200,
