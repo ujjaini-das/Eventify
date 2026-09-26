@@ -28,7 +28,7 @@ function EditEvent() {
                 const token = localStorage.getItem("token");
 
                 const response = await fetch(
-                    `http://localhost:5000/api/events/${id}`,
+                    `https://eventify-1u11.onrender.com/api/events/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -85,7 +85,7 @@ function EditEvent() {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                `http://localhost:5000/api/events/${id}`,
+                `https://eventify-1u11.onrender.com/api/events/${id}`,
                 {
                     method: "PATCH",
                     headers: {

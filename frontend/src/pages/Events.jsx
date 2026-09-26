@@ -31,7 +31,7 @@ function Events() {
             }
 
             const response = await fetch(
-                `http://localhost:5000/api/events?${params.toString()}`
+                `https://eventify-1u11.onrender.com/api/events?${params.toString()}`
             );
 
             const data = await response.json();

@@ -24,7 +24,7 @@ function Ticket() {
                 const token = localStorage.getItem("token");
 
                 const response = await fetch(
-                    `http://localhost:5000/api/registrations/${id}`,
+                    `https://eventify-1u11.onrender.com/api/registrations/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
