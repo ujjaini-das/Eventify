@@ -32,7 +32,7 @@ const EventDetails = () => {
         const fetchEventAndRegistration = async () => {
             try {
                 const eventResponse = await fetch(
-                    `https://eventify-1u11.onrender.com/api/events/${id}`
+                    `https://eventify-1ul1.onrender.com/api/events/${id}`
                 );
 
                 const eventData = await eventResponse.json();
@@ -49,7 +49,7 @@ const EventDetails = () => {
 
                 if (token) {
                     const registrationResponse = await fetch(
-                        "https://eventify-1u11.onrender.com/api/registrations/my-events",
+                        "https://eventify-1ul1.onrender.com/api/registrations/my-events",
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`
@@ -97,7 +97,7 @@ const EventDetails = () => {
             setRegistering(true);
 
             const response = await fetch(
-                `https://eventify-1u11.onrender.com/api/registrations/${id}/register`,
+                `https://eventify-1ul1.onrender.com/api/registrations/${id}/register`,
                 {
                     method: "POST",
                     headers: {

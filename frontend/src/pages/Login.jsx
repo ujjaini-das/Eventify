@@ -13,7 +13,7 @@ const Login = () => {
 
         try {
             const response = await fetch(
-                "https://eventify-1u11.onrender.com/api/auth/login",
+                "https://eventify-1ul1.onrender.com/api/auth/login",
                 {
                     method: "POST",
                     headers: {

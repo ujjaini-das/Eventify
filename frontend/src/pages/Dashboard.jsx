@@ -65,7 +65,7 @@ function Dashboard() {
                     );
 
                     const response = await fetch(
-                        "https://eventify-1u11.onrender.com/api/events",
+                        "https://eventify-1ul1.onrender.com/api/events",
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ function Dashboard() {
                     for (const event of organizerEvents) {
 
                         const attendanceResponse = await fetch(
-                            `https://eventify-1u11.onrender.com/api/registrations/event/${event._id}/attendance`,
+                            `https://eventify-1ul1.onrender.com/api/registrations/event/${event._id}/attendance`,
                             {
                                 headers: {
                                     Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ function Dashboard() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-            `http://localhost:5000/api/events/${eventId}`,
+            `https://eventify-1ul1.onrender.com/api/events/${eventId}`,
             {
                 method: "DELETE",
                 headers: {

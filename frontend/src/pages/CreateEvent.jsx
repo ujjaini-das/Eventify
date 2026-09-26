@@ -73,7 +73,7 @@ function CreateEvent() {
             }
 
             const response = await fetch(
-                "https://eventify-1u11.onrender.com/api/events",
+                "https://eventify-1ul1.onrender.com/api/events",
                 {
                     method: "POST",
                     headers: {

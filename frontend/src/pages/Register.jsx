@@ -30,7 +30,7 @@ function Register() {
             setMessage("");
 
             const response = await fetch(
-                "https://eventify-1u11.onrender.com/api/auth/register",
+                "https://eventify-1ul1.onrender.com/api/auth/register",
                 {
                     method: "POST",
                     headers: {

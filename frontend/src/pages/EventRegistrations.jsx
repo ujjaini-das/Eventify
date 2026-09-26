@@ -19,7 +19,7 @@ function EventRegistrations() {
                 const token = localStorage.getItem("token");
 
                 const response = await fetch(
-                    `http://localhost:5000/api/registrations/${id}/registrations`,
+                    `https://eventify-1ul1.onrender.com/api/registrations/${id}/registrations`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -37,7 +37,7 @@ function EventRegistrations() {
 
                 setRegistrations(data);
                 const eventResponse = await fetch(
-                    `http://localhost:5000/api/events/${id}`
+                    `https://eventify-1ul1.onrender.com/api/events/${id}`
                 );
 
                 const eventData = await eventResponse.json();

@@ -22,7 +22,7 @@ import "./Attendance.css";
                 setRefreshing(true);
 
                 const response = await fetch(
-                    `http://localhost:5000/api/registrations/event/${id}/attendance`,
+                    `https://eventify-1ul1.onrender.com/api/registrations/event/${id}/attendance`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ import "./Attendance.css";
                 setAttendance(data);
 
                 const registrationsResponse = await fetch(
-                    `http://localhost:5000/api/registrations/${id}/registrations`,
+                    `https://eventify-1ul1.onrender.com/api/registrations/${id}/registrations`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

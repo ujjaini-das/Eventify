@@ -29,7 +29,7 @@ function QRScanner() {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                "http://localhost:5000/api/registrations/check-in",
+                "https://eventify-1ul1.onrender.com/api/registrations/check-in",
                 {
                     method: "POST",
                     headers: {
