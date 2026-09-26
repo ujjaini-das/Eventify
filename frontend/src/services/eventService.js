@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/events";
+const API_URL = "https://eventify-1u11.onrender.com/api/events";
 
 export const getEvents = async () => {
     const response = await axios.get(API_URL);
